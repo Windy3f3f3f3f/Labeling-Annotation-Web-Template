@@ -1,0 +1,26 @@
+[
+  {
+    "data_id": 1,
+    "textA": "This is the first textA.",
+    "textB": "This is the first textB.",
+    "annotations": [
+      {
+        "username": "王迪",
+        "score": 5,
+        "timestamp": "2025-01-13 19:44:58"
+      }
+    ]
+  },
+  {
+    "data_id": 2,
+    "textA": "This is the second textA.",
+    "textB": "This is the second textB.",
+    "annotations": [
+      {
+        "username": "王迪",
+        "score": 2,
+        "timestamp": "2025-01-13 19:45:05"
+      }
+    ]
+  }
+]

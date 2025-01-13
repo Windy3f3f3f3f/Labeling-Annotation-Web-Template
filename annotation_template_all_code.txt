@@ -1,0 +1,2363 @@
+Here's the directory structure and code files:
+
+Directory Structure:
+📄 .gitignore
+📁 .vscode
+    📄 settings.json
+📄 README.md
+📄 README_zh.md
+📄 annotation_template_all_code.txt
+📁 assets
+📁 backend
+    📄 .gitignore
+    📁 __pycache__
+    📄 annotation_results_20250113_194802.json
+    📁 annotation_types
+        📁 __pycache__
+        📄 base.py
+        📄 scoring.py
+    📄 app.py
+    📄 config.py
+    📄 data_to_load.json
+    📁 database
+        📁 __pycache__
+        📄 db_utils.py
+    📄 export_data.py
+    📄 load_data.py
+    📄 requirements.txt
+📁 frontend
+    📄 .browserslistrc
+    📄 .eslintrc.js
+    📄 .genignore
+    📄 .gitignore
+    📄 babel.config.js
+    📄 package.json
+    📁 public
+        📄 index.html
+    📁 src
+        📄 App.vue
+        📁 access
+            📄 accessEnum.ts
+            📄 checkAccess.ts
+        📁 api
+            📄 annotation.ts
+            📄 auth.ts
+            📄 index.ts
+        📁 assets
+            📄 global.css
+            📄 logo.svg
+        📁 components
+            📄 GlobalFooter.vue
+            📄 GlobalHeader.vue
+        📁 constants
+            📄 config.ts
+        📁 layouts
+            📄 BasicLayout.vue
+        📄 main.ts
+        📁 router
+            📄 index.ts
+            📄 routes.ts
+        📄 shims-vue.d.ts
+        📁 store
+            📄 auth.ts
+            📄 index.ts
+            📄 user.ts
+        📁 utils
+            📄 authUtils.ts
+            📄 helper.ts
+        📁 views
+            📄 AnnotationView.vue
+            📄 HomeView.vue
+    📄 tsconfig.json
+    📄 vue.config.js
+📁 src
+    📁 api
+    📁 config
+
+Code Files:
+----- Start of .gitignore -----
+label/
+
+----- End of .gitignore -----
+
+----- Start of .vscode/settings.json -----
+{
+}
+
+----- End of .vscode/settings.json -----
+
+----- Start of README.md -----
+# Text Annotation System Template
+
+A text annotation system template with separated frontend and backend. The backend uses Flask (Python) for data management and API provision, while the frontend uses Vue 3 (with Element-Plus) for visual interface and interaction logic.
+
+[中文文档](./README_zh.md)
+
+![Home Page](./assets/home.png)
+
+## Feature Overview
+
+### 1. Backend (Flask + SQLite)
+- Provides RESTful API endpoints, such as getting the next unannotated data, submitting annotation results, getting annotation progress, etc.
+- Built-in scoring annotation logic: BaseAnnotation base class, customizable scoring logic
+- Supports data import (load_data.py) and export (export_data.py) to JSON files
+- Uses SQLite database by default for data persistence
+
+### 2. Frontend (Vue 3 + Element-Plus)
+- Initialized with Vue CLI, built-in routing and state management examples
+- Integrates Element-Plus [https://element-plus.org/en-US/] component library, providing rich UI components (forms, buttons, dialogs, progress bars, etc.)
+- Provides a typical text comparison + scoring annotation interface AnnotationView.vue, which can be used as a base for developing various annotation methods
+
+### 3. Extensibility
+
+#### Backend:
+- Add custom logic classes in the annotation_types folder, inheriting from BaseAnnotation
+- Modify or add database table structures to accommodate different types of annotations (multiple-choice annotation, named entity recognition, etc.)
+
+#### Frontend:
+- Modify views/AnnotationView.vue or create new components to extend text display methods, button layouts, or scoring dimensions
+- Use Vuex for global state management (such as user information, permissions, etc.), add new pages or functional modules through Vue Router
+
+## Project Structure
+
+```
+.
+├── .gitignore
+├── README.md                        # This file
+├── backend/
+│   ├── app.py                       # Flask entry, register routes, start service
+│   ├── config.py                    # Backend configuration (database, server port, CORS, etc.)
+│   ├── load_data.py                 # Import JSON data to database
+│   ├── export_data.py               # Export annotation results from database to JSON
+│   ├── annotation_types/            # Store annotation logic classes
+│   │   ├── base.py                  # Annotation logic base class
+│   │   └── scoring.py               # Example scoring annotation logic
+│   ├── database/                    # Database related tools
+│   │   └── db_utils.py              # Database initialization, connection, table creation
+│   └── requirements.txt             # Python dependencies
+├── frontend/
+│   ├── package.json                 # Frontend dependencies
+│   ├── public/
+│   │   └── index.html               # Frontend entry file
+│   ├── src/
+│   │   ├── api/                     # axios encapsulation and backend interaction
+│   │   ├── components/              # components
+│   │   ├── constants/               # global configuration
+│   │   ├── layouts/                 # layout components
+│   │   ├── views/                   # view components
+│   │   ├── store/                   # Vuex state management
+│   │   ├── router/                  # Vue Router configuration
+│   │   └── main.ts                  # Vue application entry
+│   └── vue.config.js                # Frontend service configuration
+└── ...
+```
+
+## Quick Start
+
+### 0. configure port, ip, etc.
+(if you want local debug, you can set frontend to http://localhost:8080)
+- Modify backend/config.py CORS.ORIGINS to the frontend service ip:port
+- Modify frontend/src/constants/config.ts API.BASE_URL to the backend service ip:port
+### 1. Start Backend (Flask)
+
+#### Install Dependencies
+
+```bash
+cd backend
+# Recommend using virtual environment (venv/conda) to isolate environment
+conda create -n flask python=3.9
+conda activate flask
+pip install -r requirements.txt
+```
+
+#### Import Data (Required for first start, skip for subsequent starts)
+
+```bash
+python load_data.py --file data_to_load.json
+```
+
+This will read JSON content and write to the annotation_data table. You can extend load_data.py according to field requirements.
+
+#### Start Backend Service
+
+```bash
+python app.py
+```
+
+After successful start, you can access http://127.0.0.1:5000. This address provides routes like /api/annotation/next, /api/annotation/submit for annotation operations.
+
+#### Export Annotation Results (Optional)
+
+```bash
+python export_data.py --output results.json
+```
+
+If --output is not specified, it will automatically generate a filename with timestamp.
+
+### 3. Start Frontend (Vue 3)
+
+#### Install Dependencies
+
+```bash
+cd ../frontend
+npm install
+```
+
+#### Start Frontend Service
+
+```bash
+npm run serve
+```
+
+By default, it will start the development server at http://localhost:10002 (port can be changed in vue.config.js).
+
+#### Access Annotation Page
+Open browser and visit http://localhost:10002 to see the example annotation interface. The frontend will call the APIs provided by the backend to get/submit annotation data.
+
+## How to Customize the Annotation System
+
+### 1. Customize Annotation Logic
+To implement new annotation types (such as multiple-choice annotation, sequence annotation, etc.), you need to modify these files:
+
+1. **backend/annotation_types/** directory
+   - Create new annotation type file (e.g., multiple_choice.py)
+   - Inherit from BaseAnnotation class in base.py
+   - Implement necessary methods (get_next_data, submit_annotation, get_progress)
+
+2. **backend/database/db_utils.py**
+   - Add new table definitions in init_db() function
+   - Design appropriate table structure for new annotation type
+
+3. **backend/app.py**
+   - Import new annotation class
+   - Add corresponding API routes
+   - Implement route handling logic
+
+### 2. Customize Frontend Interface
+To implement new annotation interfaces, you need to modify these files:
+
+1. **frontend/src/views/**
+   - Create or modify view components (e.g., MultipleChoiceView.vue)
+   - Implement annotation interface template and interaction logic
+
+2. **frontend/src/router/routes.ts**
+   - Add route configuration for new view
+   - Set route parameters and meta information
+
+3. **frontend/src/api/annotation.ts**
+   - Add API call functions corresponding to new annotation type
+   - Define request and response data types
+
+4. **frontend/src/store/** (Optional)
+   - Add new store module if global state management is needed
+   - Implement state management related logic
+   
+### 3. Extend Data Import/Export
+If the new annotation type needs special data format:
+
+1. **backend/load_data.py**
+   - Modify data import logic
+   - Add data format validation
+
+2. **backend/export_data.py**
+   - Modify data export logic
+   - Adjust export file format
+
+## Actual Deployment
+Since it's a simple annotation system, actual deployment might not be necessary.
+
+If deployment is needed, deploy frontend static files through Nginx and start backend service through Gunicorn.
+
+## Currently Not Supported
+- User login and permission management
+- Annotation result visualization
+
+----- End of README.md -----
+
+----- Start of README_zh.md -----
+# 文本标注系统示例
+
+一个前后端分离的文本标注系统示例，后端使用 Flask（Python）进行数据管理与 API 提供，前端使用 Vue 3（结合 Element-Plus）实现可视化界面和交互逻辑。
+
+[English Document](./README.md)
+
+![Home Page](./assets/home.png)
+
+## 功能概览
+
+### 1. 后端 (Flask + SQLite)
+- 提供 RESTful API 接口，如获取下一条未标注数据、提交标注结果、获取标注进度等
+- 内置打分标注逻辑：BaseAnnotation 基类，可以自定义打分逻辑
+- 支持数据导入 (load_data.py) 与导出 (export_data.py) 到 JSON 文件
+- 默认使用 SQLite 数据库进行数据持久化
+
+### 2. 前端 (Vue 3 + Element-Plus)
+- 使用 Vue CLI 初始化，内置路由、状态管理示例
+- 集成 Element-Plus [https://element-plus.org/zh-CN/] 组件库，提供丰富的 UI 组件（表单、按钮、弹窗、进度条等）
+- 提供典型的文本对比 + 打分标注界面 AnnotationView.vue，可在此基础上二次开发多种标注方式
+
+### 3. 可扩展性
+
+#### 后端：
+- 在 annotation_types 文件夹下新增自定义逻辑类，继承 BaseAnnotation
+- 修改或新增数据库表结构，以满足不同类型标注（多选标注、命名实体识别等）
+
+#### 前端：
+- 修改 views/AnnotationView.vue 或自建组件，扩展文本展示方式、按钮布局或打分维度
+- 通过 Vuex 做全局状态管理（如用户信息、权限等），通过 Vue Router 增加新页面或功能模块
+
+## 项目结构
+
+```
+.
+├── .gitignore
+├── RAEDME.md                        # 本文件
+├── backend/
+│   ├── app.py                       # Flask 入口，注册路由、启动服务
+│   ├── config.py                    # 后端配置（数据库、服务器端口、CORS 等）
+│   ├── load_data.py                 # 导入 JSON 数据到数据库
+│   ├── export_data.py               # 导出数据库中标注结果为 JSON
+│   ├── annotation_types/            # 存放标注逻辑类
+│   │   ├── base.py                  # 标注逻辑基类
+│   │   └── scoring.py               # 示例打分标注逻辑
+│   ├── database/                    # 数据库相关工具
+│   │   └── db_utils.py              # 数据库初始化、连接、建表
+│   └── requirements.txt             # Python 依赖
+├── frontend/
+│   ├── package.json                 # 前端依赖
+│   ├── public/
+│   │   └── index.html               # 前端入口文件
+│   ├── src/
+│   │   ├── api/                     # axios 封装及后端交互
+│   │   ├── constants/               # 全局配置
+│   │   ├── layouts/                 # 布局组件
+│   │   ├── views/                   # 视图组件
+│   │   │   ├── AnnotationView.vue   # 标注界面示例（双文本打分）
+│   │   │   └── HomeView.vue         # 示例首页
+│   │   ├── store/                   # Vuex 状态管理
+│   │   ├── router/                  # Vue Router 路由配置
+│   │   └── main.ts                  # Vue 应用入口
+│   └── vue.config.js                # 前端服务配置
+└── ...
+```
+
+## 快速开始
+
+### 0. 配置端口、ip等
+
+- 修改 backend/config.py 中的 CORS.ORIGINS 为前端服务ip:端口
+- 修改 frontend/src/constants/config.ts 中的 API.BASE_URL 为后端服务ip:端口
+
+### 1. 启动后端 (Flask)
+
+#### 安装依赖
+
+```bash
+cd backend
+# 建议使用虚拟环境(venv/conda)隔离环境
+conda create -n flask python=3.9
+conda activate flask
+pip install -r requirements.txt
+```
+
+#### 导入数据（第一次启动时需执行，后续启动时跳过）
+
+```bash
+python load_data.py --file data_to_load.json
+```
+
+将读取 JSON 内容并写入 annotation_data 数据表。可在 load_data.py 中根据字段需要自行扩展。
+
+#### 启动后端服务
+
+```bash
+python app.py
+```
+
+成功后可访问 http://127.0.0.1:5000。该地址提供了类似 /api/annotation/next、/api/annotation/submit 等路由用于标注操作。
+
+#### 导出标注结果（可选）
+
+```bash
+python export_data.py --output results.json
+```
+
+若不指定 --output，会自动生成带时间戳的文件名。
+
+### 3. 启动前端 (Vue 3)
+
+#### 安装依赖
+
+```bash
+cd ../frontend
+npm install
+```
+
+#### 启动前端服务
+
+```bash
+npm run serve
+```
+
+默认会在 http://localhost:10002 启动开发服务器（可在 vue.config.js 中更改端口）。
+
+#### 访问标注页面
+打开浏览器访问 http://localhost:10002，即可看到示例标注界面。前端会调用后端提供的 API 来获取/提交标注数据。
+
+## 如何自定义标注系统
+
+### 1. 自定义标注逻辑
+要实现新的标注类型(如多选标注、序列标注等),需要修改以下文件:
+
+1. **backend/annotation_types/** 目录
+   - 新建标注类型文件(如 multiple_choice.py)
+   - 继承 base.py 中的 BaseAnnotation 类
+   - 实现必要的方法(get_next_data, submit_annotation, get_progress)
+
+2. **backend/database/db_utils.py**
+   - 在 init_db() 函数中添加新的数据表定义
+   - 根据新标注类型设计合适的表结构
+
+3. **backend/app.py**
+   - 导入新的标注类
+   - 添加对应的 API 路由
+   - 实现路由处理逻辑
+
+### 2. 自定义前端界面
+要实现新的标注界面,需要修改以下文件:
+
+1. **frontend/src/views/**
+   - 新建或修改视图组件(如 MultipleChoiceView.vue)
+   - 实现标注界面的模板和交互逻辑
+
+2. **frontend/src/router/routes.ts**
+   - 添加新视图的路由配置
+   - 设置路由参数和元信息
+
+3. **frontend/src/api/annotation.ts**
+   - 添加与新标注类型对应的 API 调用函数
+   - 定义请求和响应的数据类型
+
+4. **frontend/src/store/** (可选)
+   - 如需要全局状态管理,添加新的 store 模块
+   - 实现状态管理相关逻辑
+   
+### 3. 扩展数据导入导出
+如果新的标注类型需要特殊的数据格式:
+
+1. **backend/load_data.py**
+   - 修改数据导入逻辑
+   - 添加数据格式验证
+
+2. **backend/export_data.py**
+   - 修改数据导出逻辑
+   - 调整导出文件格式
+
+
+## 实际部署
+由于是简单标注，应该不需要实际部署。
+
+如果需要实际部署的话，要通过Nginx部署前端的静态文件，通过Gunicorn启动后端服务。
+
+## 目前没支持的
+- 用户登录等权限管理
+- 标注结果可视化
+
+----- End of README_zh.md -----
+
+----- Start of annotation_template_all_code.txt -----
+Here's the directory structure and code files:
+
+Directory Structure:
+
+...（仅展示部分内容）...
+
+----- End of annotation_template_all_code.txt -----
+
+----- Start of backend/.gitignore -----
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Flask
+instance/
+.webassets-cache
+.env
+.flaskenv
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.venv/
+
+# IDE - VSCode
+.vscode/
+*.code-workspace
+
+# IDE - PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# IDE - Jupyter Notebook
+.ipynb_checkpoints
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# 其他
+.coverage
+htmlcov/
+.pytest_cache/
+
+----- End of backend/.gitignore -----
+
+----- Start of backend/annotation_results_20250113_194802.json -----
+[
+  {
+    "data_id": 1,
+    "textA": "This is the first textA.",
+    "textB": "This is the first textB.",
+    "annotations": [
+      {
+        "username": "王迪",
+        "score": 5,
+        "timestamp": "2025-01-13 19:44:58"
+      }
+    ]
+  },
+  {
+    "data_id": 2,
+    "textA": "This is the second textA.",
+    "textB": "This is the second textB.",
+    "annotations": [
+      {
+        "username": "王迪",
+        "score": 2,
+        "timestamp": "2025-01-13 19:45:05"
+      }
+    ]
+  }
+]
+----- End of backend/annotation_results_20250113_194802.json -----
+
+----- Start of backend/annotation_types/base.py -----
+# backend/annotation_types/base.py
+
+from abc import ABC, abstractmethod
+
+class BaseAnnotation(ABC):
+    """
+    Interface or abstract base class for annotation types.
+    Different annotation logic can inherit this class and implement their own methods.
+    """
+
+    @abstractmethod
+    def get_next_data(self, username: str):
+        """
+        Get the next data that has not been annotated by the user.
+        :param username: The username for assigning tasks.
+        :return: dict or None
+        """
+        pass
+
+    @abstractmethod
+    def submit_annotation(self, data_id: int, username: str, score: int):
+        """
+        Submit the annotation result.
+        """
+        pass
+
+    @abstractmethod
+    def get_progress(self, username: str):
+        """
+        Get the annotation progress of the user.
+        """
+        pass
+
+----- End of backend/annotation_types/base.py -----
+
+----- Start of backend/annotation_types/scoring.py -----
+# backend/annotation_types/scoring.py
+
+from .base import BaseAnnotation
+from database.db_utils import get_connection
+
+class ScoringAnnotation(BaseAnnotation):
+    """
+    示例：1~5分的打分标注逻辑
+    """
+    def get_next_data(self, username: str):
+        """
+        获取该用户还未标注的下一条数据
+        """
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # 找到用户还没标注过的记录
+        # 简化逻辑：只要 annotation_result 里没有该用户的记录就算是未标注
+        query = """
+        SELECT d.id, d.textA, d.textB
+        FROM annotation_data d
+        WHERE d.id NOT IN (
+            SELECT data_id FROM annotation_result WHERE username = ?
+        )
+        LIMIT 1
+        """
+        cur.execute(query, (username,))
+        row = cur.fetchone()
+        conn.close()
+
+        if row:
+            return {
+                "id": row["id"],
+                "textA": row["textA"],
+                "textB": row["textB"]
+            }
+        else:
+            # 没有更多数据了
+            return None
+
+    def submit_annotation(self, data_id: int, username: str, score: int):
+        """
+        提交标注结果
+        """
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # 插入到 annotation_result
+        cur.execute("""
+            INSERT INTO annotation_result (data_id, username, score)
+            VALUES (?, ?, ?)
+        """, (data_id, username, score))
+
+        # 如果需要的话，可以在这里将 annotation_data.is_annotated 标记为 1
+        # 但要区分是否仅当所有用户都标注完才标记
+        cur.execute("""
+            UPDATE annotation_data
+            SET is_annotated = 1
+            WHERE id = ?
+        """, (data_id,))
+
+        conn.commit()
+        conn.close()
+
+    def get_progress(self, username: str):
+        """
+        获取用户的标注进度
+        """
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # 总数据量
+        cur.execute("SELECT COUNT(*) as total FROM annotation_data")
+        total = cur.fetchone()["total"]
+
+        # 用户已经标注的数量
+        cur.execute("""
+            SELECT COUNT(*) as completed
+            FROM annotation_result
+            WHERE username = ?
+        """, (username,))
+        completed = cur.fetchone()["completed"]
+
+        conn.close()
+
+        return {
+            "completed": completed,
+            "total": total
+        }
+
+----- End of backend/annotation_types/scoring.py -----
+
+----- Start of backend/app.py -----
+# backend/app.py
+
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from annotation_types.scoring import ScoringAnnotation
+from database.db_utils import init_db
+from config import SERVER, CORS_ORIGINS
+
+app = Flask(__name__)
+
+CORS(app, resources={
+    r"/*": {
+        "origins": CORS_ORIGINS,
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
+
+
+init_db()
+
+annotation_handler = ScoringAnnotation()
+
+@app.route("/api/annotation/next", methods=["GET"])
+def get_next_annotation():
+    username = request.args.get("username", "").strip()
+    if not username:
+        return jsonify({"error": "Username required"}), 400
+
+    data = annotation_handler.get_next_data(username)
+    if data:
+        return jsonify(data), 200
+    else:
+        return jsonify({"message": "No more data"}), 200
+
+@app.route("/api/annotation/submit", methods=["POST"])
+def submit_annotation():
+    payload = request.json
+    if not payload:
+        return jsonify({"error": "Missing payload"}), 400
+
+    data_id = payload.get("dataId")
+    username = payload.get("userName", "").strip()
+    score = payload.get("score")
+
+    if not data_id or not username or score is None:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        annotation_handler.submit_annotation(data_id, username, score)
+        return jsonify({"message": "Annotation submitted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/annotation/progress", methods=["GET"])
+def get_progress():
+    username = request.args.get("username", "").strip()
+    if not username:
+        return jsonify({"error": "Username required"}), 400
+
+    try:
+        progress = annotation_handler.get_progress(username)
+        return jsonify(progress), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(
+        host=SERVER['host'],
+        port=SERVER['port'],
+        debug=SERVER['debug']
+    )
+
+----- End of backend/app.py -----
+
+----- Start of backend/config.py -----
+"""
+Backend configuration settings
+"""
+import os
+
+# Base directory of the backend
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Database settings
+DATABASE = {
+    'path': os.path.join(BASE_DIR, 'database', 'database.db'),
+    # You can add more database settings here if needed
+}
+
+# Server settings
+SERVER = {
+    'host': '0.0.0.0',  # Listen on all interfaces
+    'port': 5000,
+    'debug': True,  # Set to False in production
+}
+
+# CORS settings
+CORS_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://maybe_nginx_ip_or_vue_server_ip:port",
+] 
+
+----- End of backend/config.py -----
+
+----- Start of backend/data_to_load.json -----
+[
+    {
+        "textA": "This is the first textA.",
+        "textB": "This is the first textB."
+    },
+    {
+        "textA": "This is the second textA.",
+        "textB": "This is the second textB."
+    }
+]
+
+----- End of backend/data_to_load.json -----
+
+----- Start of backend/database/db_utils.py -----
+# backend/database/db_utils.py
+import sqlite3
+import os
+from config import DATABASE
+
+def get_connection():
+    """Get a connection to the database."""
+    os.makedirs(os.path.dirname(DATABASE['path']), exist_ok=True)
+    
+    conn = sqlite3.connect(DATABASE['path'])
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    """Initialize the database."""
+    conn = get_connection()
+    cur = conn.cursor()
+
+    # Create table: original data table
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS annotation_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        textA TEXT NOT NULL,
+        textB TEXT NOT NULL,
+        is_annotated INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+    """)
+
+    # Create table: annotation result table
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS annotation_result (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        data_id INTEGER NOT NULL,
+        username TEXT NOT NULL,
+        score INTEGER NOT NULL,
+        timestamp TEXT DEFAULT (datetime('now','localtime')),
+        FOREIGN KEY (data_id) REFERENCES annotation_data(id),
+        UNIQUE(data_id, username)
+    );
+    """)
+
+    conn.commit()
+    conn.close()
+
+----- End of backend/database/db_utils.py -----
+
+----- Start of backend/export_data.py -----
+# backend/export_data.py
+
+import json
+import argparse
+from datetime import datetime
+from database.db_utils import get_connection
+
+def export_annotation_results(output_file=None):
+    """
+    Export annotation results from database to a JSON file.
+    
+    Args:
+        output_file (str, optional): Path to output JSON file. 
+            If not provided, will generate a filename with timestamp.
+    
+    Returns:
+        str: Path to the exported file
+    """
+    # Generate default filename if not provided
+    if not output_file:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = f"annotation_results_{timestamp}.json"
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Query to join annotation_data with annotation_result
+    query = """
+    SELECT 
+        d.id as data_id,
+        d.textA,
+        d.textB,
+        r.username,
+        r.score,
+        r.timestamp
+    FROM annotation_data d
+    LEFT JOIN annotation_result r ON d.id = r.data_id
+    ORDER BY d.id, r.timestamp
+    """
+    
+    cur.execute(query)
+    rows = cur.fetchall()
+    
+    # Process the results
+    results = {}
+    for row in rows:
+        data_id = row['data_id']
+        if data_id not in results:
+            results[data_id] = {
+                'data_id': data_id,
+                'textA': row['textA'],
+                'textB': row['textB'],
+                'annotations': []
+            }
+        
+        # Only add annotation if it exists (handle NULL case from LEFT JOIN)
+        if row['username']:
+            results[data_id]['annotations'].append({
+                'username': row['username'],
+                'score': row['score'],
+                'timestamp': row['timestamp']
+            })
+    
+    # Convert to list for final JSON
+    final_results = list(results.values())
+    
+    # Write to JSON file
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(final_results, f, ensure_ascii=False, indent=2)
+    
+    conn.close()
+    
+    print(f"Successfully exported {len(final_results)} records to {output_file}")
+    return output_file
+
+def main():
+    parser = argparse.ArgumentParser(description='Export annotation results to JSON')
+    parser.add_argument('--output', '-o', type=str, help='Output JSON file path')
+    args = parser.parse_args()
+    
+    export_annotation_results(args.output)
+
+if __name__ == "__main__":
+    main() 
+
+----- End of backend/export_data.py -----
+
+----- Start of backend/load_data.py -----
+# backend/load_data.py
+
+import json
+import argparse
+from database.db_utils import get_connection, init_db
+
+def load_json_data(file_path):
+    """
+    Load JSON file, each record should contain { "textA": "...", "textB": "..." }
+    Write to annotation_data table.
+    """
+    # 确保先初始化数据库
+    init_db()
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data_list = json.load(f)
+
+    for item in data_list:
+        textA = item["textA"]
+        textB = item["textB"]
+
+        cur.execute("""
+            INSERT INTO annotation_data (textA, textB)
+            VALUES (?, ?)
+        """, (textA, textB))
+    
+    conn.commit()
+    conn.close()
+
+    print(f"Successfully loaded {len(data_list)} records into the database!")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--file', type=str, required=True, help='Path to JSON file')
+    args = parser.parse_args()
+
+    load_json_data(args.file)
+
+----- End of backend/load_data.py -----
+
+----- Start of backend/requirements.txt -----
+Flask
+Flask-CORS
+click
+
+...（仅展示部分内容）...
+
+----- End of backend/requirements.txt -----
+
+----- Start of frontend/.browserslistrc -----
+> 1%
+last 2 versions
+not dead
+not ie 11
+
+----- End of frontend/.browserslistrc -----
+
+----- Start of frontend/.eslintrc.js -----
+module.exports = {
+  root: true,
+  env: {
+    node: true,
+  },
+  extends: [
+    "plugin:vue/vue3-essential",
+    "eslint:recommended",
+    "@vue/typescript/recommended",
+    "plugin:prettier/recommended",
+  ],
+  parserOptions: {
+    ecmaVersion: 2020,
+  },
+  rules: {
+    "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "prettier/prettier": ["error", { endOfLine: "auto" }],
+  },
+};
+
+----- End of frontend/.eslintrc.js -----
+
+----- Start of frontend/.genignore -----
+package-lock.json
+
+----- End of frontend/.genignore -----
+
+----- Start of frontend/.gitignore -----
+.DS_Store
+node_modules
+/dist
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.git
+
+----- End of frontend/.gitignore -----
+
+----- Start of frontend/babel.config.js -----
+module.exports = {
+  presets: ["@vue/cli-plugin-babel/preset"],
+};
+
+----- End of frontend/babel.config.js -----
+
+----- Start of frontend/package.json -----
+{
+  "name": "labeling",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@vue/cli-service": "^5.0.8",
+    "axios": "^1.7.2",
+    "core-js": "^3.8.3",
+    "d3": "^7.9.0",
+    "echarts": "^5.5.1",
+    "element-plus": "^2.7.4",
+    "vue": "^3.2.13",
+    "vue-echarts": "^7.0.3",
+    "vue-router": "^4.0.3",
+    "vuex": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "^3.8.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-typescript": "~5.0.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "@vue/eslint-config-typescript": "^9.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "prettier": "^2.4.1",
+    "typescript": "~4.5.5"
+  }
+}
+
+----- End of frontend/package.json -----
+
+----- Start of frontend/public/index.html -----
+<!DOCTYPE html>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+        href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+        rel="stylesheet"
+/>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
+
+----- End of frontend/public/index.html -----
+
+----- Start of frontend/src/App.vue -----
+<template>
+  <BasicLayout>
+    <router-view />
+  </BasicLayout>
+</template>
+
+<script setup lang="ts">
+// Import basic layout component
+import BasicLayout from "./layouts/BasicLayout.vue";
+</script>
+
+<style scoped>
+body {
+  font-family: "Roboto", sans-serif;
+  color: #333333;
+}
+</style>
+
+----- End of frontend/src/App.vue -----
+
+----- Start of frontend/src/access/accessEnum.ts -----
+/**
+ * @description Access control enum
+ * @enum {string}
+ */
+const ACCESS_ENUM = {
+  NOT_LOGIN: "notLogin",
+  USER: "user",
+  ADMIN: "admin",
+};
+
+export default ACCESS_ENUM;
+
+----- End of frontend/src/access/accessEnum.ts -----
+
+----- Start of frontend/src/access/checkAccess.ts -----
+import AccessEnum from "@/access/accessEnum";
+
+/**
+ * Check if the user has permission
+ * @param loginUser Current login user
+ * @param needAccess Required access
+ * @return boolean Whether the user has permission
+ */
+import ACCESS_ENUM from "@/access/accessEnum";
+const checkAccess = (loginUser: any, needAccess = ACCESS_ENUM.NOT_LOGIN) => {
+  // Get the current login user's access (if there is no loginUser, it defaults to not logged in)
+  const loginUserAccess = loginUser?.userRole ?? ACCESS_ENUM.NOT_LOGIN;
+  if (needAccess === ACCESS_ENUM.NOT_LOGIN) {
+    // No need to log in permission
+    return true;
+  }
+  if (needAccess === ACCESS_ENUM.USER) {
+    if (loginUserAccess === ACCESS_ENUM.NOT_LOGIN) {
+      return false;
+    }
+  }
+  if (needAccess === ACCESS_ENUM.ADMIN) {
+    if (loginUserAccess === ACCESS_ENUM.ADMIN) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export default checkAccess;
+
+----- End of frontend/src/access/checkAccess.ts -----
+
+----- Start of frontend/src/api/annotation.ts -----
+import axios from "./index";
+
+/**
+ * The structure of the data returned by the backend that needs to be annotated
+ */
+export interface IAnnotationData {
+  id: number;
+  textA: string;
+  textB: string;
+}
+
+/**
+ * Annotation result
+ */
+export interface ISubmitAnnotation {
+  dataId: number;
+  userName: string;
+  score: number;
+}
+
+/**
+ * Get the next data that needs to be annotated
+ */
+export async function fetchNextAnnotationData(
+  userName: string
+): Promise<IAnnotationData | null> {
+  const response = await axios.get(`/api/annotation/next`, {
+    params: { username: userName },
+  });
+  return response.data;
+}
+
+/**
+ * Submit the annotation result
+ */
+export async function submitAnnotation(
+  annotation: ISubmitAnnotation
+): Promise<void> {
+  await axios.post("/api/annotation/submit", annotation);
+}
+
+/**
+ * Get the annotation progress of the user
+ */
+export async function getAnnotationProgress(
+  userName: string
+): Promise<{ completed: number; total: number }> {
+  try {
+    const response = await axios.get(`/api/annotation/progress`, {
+      params: { username: userName },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching progress:", error);
+    throw error;
+  }
+}
+
+----- End of frontend/src/api/annotation.ts -----
+
+----- Start of frontend/src/api/auth.ts -----
+import axios from "./index";
+
+export const login = async (username: string, password: string) => {
+  try {
+    const response = await axios.post("/auth/login", { username, password });
+    return response.data;
+  } catch (error) {
+    throw new Error("Login failed");
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await axios.post("/auth/logout");
+    return response.data;
+  } catch (error) {
+    throw new Error("Logout failed");
+  }
+};
+
+----- End of frontend/src/api/auth.ts -----
+
+----- Start of frontend/src/api/index.ts -----
+import axios from "axios";
+import { ElMessage } from "element-plus";
+import { CONFIG } from "@/constants/config";
+
+// Create axios instance with configuration
+const instance = axios.create({
+  baseURL: CONFIG.API.BASE_URL,
+  headers: {
+    "Content-Type": CONFIG.API.CONTENT_TYPE,
+  },
+  timeout: CONFIG.API.TIMEOUT,
+});
+
+// Add response interceptor
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle error responses
+    if (error.response) {
+      const message = error.response.data?.error || "An error occurred";
+      ElMessage.error(message);
+    } else {
+      ElMessage.error("Network error");
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default instance;
+
+----- End of frontend/src/api/index.ts -----
+
+----- Start of frontend/src/assets/global.css -----
+/* Global styles for the entire application */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff; /* Set background to white */
+}
+a {
+  color: #409eff;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+----- End of frontend/src/assets/global.css -----
+
+----- Start of frontend/src/assets/logo.svg -----
+<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1732093606564" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1511" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="256"><path d="M57.088 514.848l2.24 1.824 437.472 437.504a112 112 0 0 0 153.6 4.512l4.8-4.512 325.472-325.504a16 16 0 0 1 24.48 20.416l-1.824 2.24-325.504 325.472a144 144 0 0 1-198.272 5.12l-5.376-5.12L36.672 539.328a16 16 0 0 1 20.416-24.48zM397.76 0a176 176 0 0 1 118.112 45.536l6.336 6.016 435.872 435.872a80 80 0 0 1 3.904 108.96l-3.904 4.16L632.576 926.08a80 80 0 0 1-108.96 3.904l-4.16-3.904L83.52 490.176a176 176 0 0 1-51.328-115.712L32 365.728V80A80 80 0 0 1 106.752 0.16L112 0h285.728z m0 32H112a48 48 0 0 0-47.776 43.392L64 80v285.728a144 144 0 0 0 36.928 96.32l5.248 5.504 435.872 435.872a48 48 0 0 0 64.256 3.296l3.648-3.296 325.472-325.472a48 48 0 0 0 3.296-64.256l-3.296-3.648L499.552 74.176A144 144 0 0 0 397.728 32z m-164.64 306.848l2.24 1.824 352 352a16 16 0 0 1-20.416 24.48l-2.24-1.824-352-352a16 16 0 0 1 20.416-24.48z m48-48l2.24 1.824 352 352a16 16 0 0 1-20.416 24.48l-2.24-1.824-352-352a16 16 0 0 1 20.416-24.48z m48-48l2.24 1.824 352 352a16 16 0 0 1-20.416 24.48l-2.24-1.824-352-352a16 16 0 0 1 20.416-24.48z m112-112l2.24 1.824 176 176a16 16 0 0 1 1.824 20.416l-1.824 2.24-64 64a16 16 0 0 1-20.416 1.824l-2.24-1.824-176-176a16 16 0 0 1-1.824-20.416l1.824-2.24 64-64a16 16 0 0 1 20.416-1.824zM432 166.624L390.624 208 544 361.376 585.376 320 432 166.624zM208 96a80 80 0 1 1 0 160 80 80 0 0 1 0-160z m0 32a48 48 0 1 0 0 96 48 48 0 0 0 0-96z" fill="#1296db" p-id="1512"></path></svg>
+----- End of frontend/src/assets/logo.svg -----
+
+----- Start of frontend/src/components/GlobalFooter.vue -----
+<template>
+  <footer class="global-footer">
+    <p>© 2024 My Company. All rights reserved.</p>
+  </footer>
+</template>
+
+<style scoped>
+.global-footer {
+  text-align: center;
+  padding: 10px 0;
+  background-color: #f5f5f5;
+}
+</style>
+
+----- End of frontend/src/components/GlobalFooter.vue -----
+
+----- Start of frontend/src/components/GlobalHeader.vue -----
+<template>
+  <header class="global-header">
+    <div class="logo-container">
+      <img src="../assets/logo.svg" alt="Logo" class="logo" />
+      <span class="app-name">Annotation Tool</span>
+    </div>
+    <nav>
+      <el-menu mode="horizontal" :default-active="$route.path" router>
+        <el-menu-item
+          v-for="route in filteredRoutes"
+          :key="route.path"
+          :index="route.path"
+        >
+          {{ route.name }}
+        </el-menu-item>
+      </el-menu>
+    </nav>
+    <div class="user-section" v-if="userName">
+      <span class="user-greeting">Hello, {{ userName }}</span>
+      <el-button class="logout-button" type="text" @click="handleLogout">
+        Logout
+      </el-button>
+    </div>
+    <el-dialog
+      v-model="showUsernameDialog"
+      title="Welcome"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      width="30%"
+    >
+      <el-form :model="form" @submit.prevent="handleSubmit">
+        <el-form-item
+          label="Username"
+          :rules="[{ required: true, message: 'Username is required' }]"
+        >
+          <el-input
+            v-model="form.username"
+            placeholder="Please enter your username"
+            @keyup.enter="handleSubmit"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="handleSubmit"> Confirm </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </header>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
+import { ElMessage } from "element-plus";
+
+const router = useRouter();
+const store = useStore();
+
+const showUsernameDialog = ref(false);
+const form = ref({
+  username: "",
+});
+
+const filteredRoutes = computed(() => {
+  return router.options.routes.filter((route) => route.name);
+});
+
+const userName = computed(() => store.state.user.username);
+
+const handleSubmit = () => {
+  if (!form.value.username.trim()) {
+    ElMessage.warning("Please enter a username");
+    return;
+  }
+  store.commit("user/setUsername", form.value.username.trim());
+  showUsernameDialog.value = false;
+};
+
+const handleLogout = () => {
+  store.dispatch("user/clearUsername");
+  showUsernameDialog.value = true;
+};
+
+onMounted(() => {
+  // If there is no username, show the dialog
+  if (!userName.value) {
+    showUsernameDialog.value = true;
+  }
+});
+</script>
+
+<style scoped>
+.global-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  height: 60px;
+  margin-bottom: 0;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.app-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+nav {
+  flex-grow: 1;
+  margin-left: 50px;
+}
+
+.el-menu {
+  background-color: transparent;
+  border-bottom: none;
+}
+
+.el-menu-item {
+  color: #333;
+  font-size: 16px;
+}
+
+.el-menu-item.is-active {
+  color: #409eff;
+}
+
+.user-greeting {
+  margin-left: auto;
+  font-size: 16px;
+  color: #333;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.user-greeting {
+  font-size: 16px;
+  color: #333;
+}
+
+.logout-button {
+  color: #666;
+  font-size: 14px;
+}
+
+.logout-button:hover {
+  color: #409eff;
+}
+</style>
+
+----- End of frontend/src/components/GlobalHeader.vue -----
+
+----- Start of frontend/src/constants/config.ts -----
+/**
+ * Global configuration
+ */
+
+// Server configurations
+export const CONFIG = {
+  // Backend API configuration
+  API: {
+    BASE_URL: "http://101.6.21.31:5000",
+    TIMEOUT: 10000,
+    CONTENT_TYPE: "application/json",
+  },
+
+  // Frontend configuration
+  FRONTEND: {
+    PORT: 10002,
+    TITLE: "Annotation Tool",
+  },
+
+  // CORS configuration
+  CORS: {
+    ORIGINS: [
+      "http://localhost:10002",
+      "http://127.0.0.1:10002",
+      "http://101.6.21.31:10002",
+    ],
+  },
+
+  // Router configuration
+  ROUTER: {
+    MODE: "history",
+    BASE_URL: "/",
+  },
+
+  // Store configuration
+  STORE: {
+    PERSIST_KEY: "vuex",
+  },
+
+  // Auth configuration
+  AUTH: {
+    TOKEN_KEY: "authToken",
+    STORAGE_KEY: {
+      USERNAME: "username",
+    },
+  },
+
+  // UI configuration
+  UI: {
+    THEME: {
+      DEFAULT: "light",
+      AVAILABLE: ["light", "dark"],
+    },
+    PROGRESS_BAR: {
+      HEIGHT: 20,
+      TEXT_INSIDE: true,
+    },
+  },
+};
+
+// Helper functions
+export const getBaseUrl = () => CONFIG.API.BASE_URL;
+export const getAuthTokenKey = () => CONFIG.AUTH.TOKEN_KEY;
+export const getUsernameKey = () => CONFIG.AUTH.STORAGE_KEY.USERNAME;
+
+----- End of frontend/src/constants/config.ts -----
+
+----- Start of frontend/src/layouts/BasicLayout.vue -----
+<template>
+  <div id="basic-layout">
+    <GlobalHeader />
+    <main>
+      <router-view />
+    </main>
+    <!-- <Footer /> -->
+  </div>
+</template>
+
+<script setup lang="ts">
+import GlobalHeader from "@/components/GlobalHeader.vue";
+// import Footer from "../components/GlobalFooter.vue";
+</script>
+
+<style scoped>
+#basic-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0; /* Add this line */
+  padding: 0; /* Add this line */
+}
+
+main {
+  flex-grow: 1;
+  padding: 0; /* Ensure no padding */
+  margin: 0; /* Ensure no margin */
+}
+</style>
+
+----- End of frontend/src/layouts/BasicLayout.vue -----
+
+----- Start of frontend/src/main.ts -----
+import { createApp } from "vue";
+import App from "./App.vue";
+import router from "./router";
+import store from "./store";
+import "./assets/global.css";
+import ElementPlus from "element-plus";
+import "element-plus/dist/index.css";
+
+createApp(App).use(router).use(store).use(ElementPlus).mount("#app");
+
+----- End of frontend/src/main.ts -----
+
+----- Start of frontend/src/router/index.ts -----
+import { createRouter, createWebHistory } from "vue-router";
+import routes from "./routes";
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
+
+export default router;
+
+----- End of frontend/src/router/index.ts -----
+
+----- Start of frontend/src/router/routes.ts -----
+import { RouteRecordRaw } from "vue-router";
+import AnnotationView from "@/views/AnnotationView.vue";
+import HomeView from "@/views/HomeView.vue";
+
+const routes: Array<RouteRecordRaw> = [
+  {
+    path: "/",
+    name: "Annotation",
+    component: AnnotationView,
+  },
+  {
+    path: "/home",
+    name: "Home",
+    component: HomeView,
+  },
+];
+
+export default routes;
+
+----- End of frontend/src/router/routes.ts -----
+
+----- Start of frontend/src/shims-vue.d.ts -----
+/* eslint-disable */
+declare module "*.vue" {
+  import { DefineComponent } from "vue";
+  const component: DefineComponent<{}, {}, any>;
+  export default component;
+}
+
+----- End of frontend/src/shims-vue.d.ts -----
+
+----- Start of frontend/src/store/auth.ts -----
+import { Module } from "vuex";
+
+interface AuthState {
+  token: string | null;
+  isAuthenticated: boolean;
+}
+
+const auth: Module<AuthState, any> = {
+  namespaced: true,
+  state: {
+    token: null,
+    isAuthenticated: false,
+  },
+  mutations: {
+    setToken(state, token: string) {
+      state.token = token;
+      state.isAuthenticated = true;
+    },
+    clearAuth(state) {
+      state.token = null;
+      state.isAuthenticated = false;
+    },
+  },
+  actions: {
+    login({ commit }, token: string) {
+      commit("setToken", token);
+    },
+    logout({ commit }) {
+      commit("clearAuth");
+    },
+  },
+};
+
+export default auth;
+
+----- End of frontend/src/store/auth.ts -----
+
+----- Start of frontend/src/store/index.ts -----
+import { createStore } from "vuex";
+import user from "./user";
+import auth from "./auth";
+
+const store = createStore({
+  modules: {
+    user,
+    auth,
+  },
+});
+
+export default store;
+
+----- End of frontend/src/store/index.ts -----
+
+----- Start of frontend/src/store/user.ts -----
+import { Module } from "vuex";
+import { CONFIG } from "@/constants/config";
+
+interface UserState {
+  username: string;
+  userId: number | null;
+  preferences: {
+    theme: string;
+  };
+}
+
+const user: Module<UserState, any> = {
+  namespaced: true,
+  state: {
+    username: localStorage.getItem(CONFIG.AUTH.STORAGE_KEY.USERNAME) || "",
+    userId: null,
+    preferences: {
+      theme: CONFIG.UI.THEME.DEFAULT,
+    },
+  },
+  mutations: {
+    setUsername(state, username: string) {
+      state.username = username;
+      localStorage.setItem(CONFIG.AUTH.STORAGE_KEY.USERNAME, username);
+    },
+    setUserId(state, userId: number) {
+      state.userId = userId;
+    },
+    setTheme(state, theme: string) {
+      state.preferences.theme = theme;
+    },
+  },
+  actions: {
+    updateUserTheme({ commit }, theme: string) {
+      commit("setTheme", theme);
+    },
+    clearUsername({ commit }) {
+      commit("setUsername", "");
+      localStorage.removeItem(CONFIG.AUTH.STORAGE_KEY.USERNAME);
+    },
+  },
+};
+
+export default user;
+
+----- End of frontend/src/store/user.ts -----
+
+----- Start of frontend/src/utils/authUtils.ts -----
+import { CONFIG } from "@/constants/config";
+
+export const saveToken = (token: string) => {
+  localStorage.setItem(CONFIG.AUTH.TOKEN_KEY, token);
+};
+
+export const getToken = () => {
+  return localStorage.getItem(CONFIG.AUTH.TOKEN_KEY);
+};
+
+export const clearToken = () => {
+  localStorage.removeItem(CONFIG.AUTH.TOKEN_KEY);
+};
+
+----- End of frontend/src/utils/authUtils.ts -----
+
+----- Start of frontend/src/utils/helper.ts -----
+export const formatDate = (date: Date): string => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  return date.toLocaleDateString(undefined, options);
+};
+
+export const capitalize = (text: string): string => {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};
+
+----- End of frontend/src/utils/helper.ts -----
+
+----- Start of frontend/src/views/AnnotationView.vue -----
+<template>
+  <div class="post-annotation-tool">
+    <!-- Card for LLM Outputs -->
+    <el-card shadow="hover" class="llm-card">
+      <h2 class="main-heading">Template Title</h2>
+
+      <!-- Progress Bar Section-->
+      <div class="progress-section">
+        <div class="model-name">
+          <strong>{{ modelName }} Outputs</strong>
+        </div>
+        <el-progress
+          :percentage="progressPercentage"
+          :text-inside="true"
+          :stroke-width="20"
+          status="active"
+          class="progress-bar"
+        >
+          <template #default>
+            <span class="progress-text">
+              {{ currentProgress }} / {{ totalOutputs }}
+            </span>
+          </template>
+        </el-progress>
+      </div>
+
+      <!-- Text Compare Section -->
+      <div class="text-compare-section">
+        <el-row :gutter="20">
+          <el-col :xs="24" :sm="12" class="text-col">
+            <h3>Text A</h3>
+            <el-input
+              type="textarea"
+              v-model="textData.textA"
+              rows="6"
+              readonly
+            />
+          </el-col>
+          <el-col :xs="24" :sm="12" class="text-col">
+            <h3>Text B</h3>
+            <el-input
+              type="textarea"
+              v-model="textData.textB"
+              rows="6"
+              readonly
+            />
+          </el-col>
+        </el-row>
+      </div>
+
+      <!-- Rating Section -->
+      <div class="rating-section">
+        <span>Similarity Score:</span>
+        <el-radio-group v-model="similarityScore" class="score-group">
+          <el-radio-button v-for="score in 5" :key="score" :label="score">
+            {{ score }}
+          </el-radio-button>
+        </el-radio-group>
+      </div>
+
+      <!-- Action Buttons -->
+      <el-row type="flex" justify="center" class="action-row">
+        <el-button
+          class="action-button"
+          type="info"
+          @click="selectTask"
+          size="large"
+        >
+          Select Task
+        </el-button>
+        <el-button
+          class="action-button"
+          type="warning"
+          @click="changeTask"
+          size="large"
+        >
+          Change
+        </el-button>
+        <el-button
+          class="action-button"
+          type="primary"
+          @click="submitAnnotations"
+          size="large"
+        >
+          Submit
+        </el-button>
+      </el-row>
+    </el-card>
+
+    <!-- Annotation Guidelines Section -->
+    <el-card class="annotation-guidelines-card" shadow="hover">
+      <h2 class="main-heading">Annotation Guidelines</h2>
+
+      <!-- Table of Contents -->
+      <div class="table-of-contents">
+        <h3>Contents</h3>
+        <ul>
+          <li>
+            <a href="#annotation-instructions">Annotation Instructions</a>
+          </li>
+          <li>
+            <a href="#example-table">Example Table</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="guidelines-content">
+        <!-- Annotation Instructions -->
+        <h3 id="annotation-instructions">Annotation Instructions</h3>
+        <ol class="instructions-list">
+          <li>
+            <strong>Step One:</strong>
+            <p>Review the texts on the left and right.</p>
+          </li>
+          <li>
+            <strong>Step Two:</strong>
+            <p>Assign a similarity score from 1 to 5.</p>
+          </li>
+          <li>
+            <strong>Step Three:</strong>
+            <p>Submit your annotation by clicking <em>Submit</em>.</p>
+          </li>
+        </ol>
+
+        <!-- Example Table -->
+        <h3 id="example-table">Example Table</h3>
+        <el-table
+          :data="tableData"
+          border
+          style="width: 100%"
+          class="instruction-table"
+        >
+          <el-table-column prop="columnA" label="Column A" width="120" />
+          <el-table-column prop="columnB" label="Column B" />
+        </el-table>
+      </div>
+    </el-card>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from "vue";
+import { useStore } from "vuex";
+import { ElMessage } from "element-plus";
+import {
+  fetchNextAnnotationData,
+  submitAnnotation,
+  getAnnotationProgress,
+  IAnnotationData,
+} from "@/api/annotation";
+
+const store = useStore();
+const userName = computed(() => store.state.user.username);
+
+// Text data
+const textData = ref<IAnnotationData>({
+  id: 0,
+  textA: "",
+  textB: "",
+});
+
+// Progress related
+const currentProgress = ref(0);
+const totalOutputs = ref(0);
+const progressPercentage = computed(() => {
+  return totalOutputs.value === 0
+    ? 0
+    : ((currentProgress.value / totalOutputs.value) * 100).toFixed(2);
+});
+
+// Similarity score
+const similarityScore = ref(0);
+
+// Load next data
+async function loadNextData() {
+  if (!userName.value) {
+    ElMessage.warning("Please enter your username first");
+    return;
+  }
+
+  try {
+    const data = await fetchNextAnnotationData(userName.value);
+    if (data) {
+      textData.value = data;
+      similarityScore.value = 0; // 重置评分
+    } else {
+      ElMessage.success("You have completed all annotations!");
+    }
+  } catch (error) {
+    ElMessage.error("Failed to load next annotation");
+  }
+}
+
+// Update progress
+async function updateProgress() {
+  if (!userName.value) return;
+
+  try {
+    const progress = await getAnnotationProgress(userName.value);
+    currentProgress.value = progress.completed;
+    totalOutputs.value = progress.total;
+  } catch (error) {
+    ElMessage.error("Failed to fetch progress");
+  }
+}
+
+// Submit annotation
+async function submitAnnotations() {
+  if (!userName.value) {
+    ElMessage.warning("Please enter your username first");
+    return;
+  }
+
+  if (similarityScore.value === 0) {
+    ElMessage.warning("Please select a similarity score");
+    return;
+  }
+
+  try {
+    await submitAnnotation({
+      dataId: textData.value.id,
+      userName: userName.value,
+      score: similarityScore.value,
+    });
+    ElMessage.success("Annotation submitted successfully!");
+    await updateProgress();
+    await loadNextData();
+  } catch (error) {
+    ElMessage.error("Failed to submit annotation");
+  }
+}
+
+// Listen to username change
+watch(userName, async (newUserName) => {
+  if (newUserName) {
+    await updateProgress();
+    await loadNextData();
+  }
+});
+
+onMounted(async () => {
+  if (userName.value) {
+    await updateProgress();
+    await loadNextData();
+  }
+});
+
+// Modify selectTask and changeTask functions
+function selectTask() {
+  loadNextData();
+}
+
+function changeTask() {
+  loadNextData();
+}
+
+// Add missing reactive properties
+const modelName = ref("GPT-4"); // Or other model name
+const tableData = ref([
+  {
+    columnA: "Example 1",
+    columnB: "Description for example 1",
+  },
+  {
+    columnA: "Example 2",
+    columnB: "Description for example 2",
+  },
+]);
+</script>
+
+<style scoped>
+.post-annotation-tool {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: #ffffff;
+}
+
+.llm-card {
+  margin-bottom: 10px;
+  padding: 0px;
+}
+
+.llm-card h2 {
+  margin-top: 2px;
+}
+
+.main-heading {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* Progress Bar Section */
+.progress-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.model-name {
+  font-size: 18px;
+  color: #606266;
+  margin-bottom: 10px;
+}
+.model-name strong {
+  font-weight: bold;
+  color: #303133;
+}
+.progress-bar {
+  display: inline-block;
+  width: 80%;
+}
+.progress-text {
+  font-size: 16px;
+  color: #ffffff;
+}
+.el-progress-bar__inner {
+  background-color: #409eff;
+}
+
+/* Text Compare Section */
+.text-compare-section {
+  margin-bottom: 20px;
+}
+.text-col {
+  margin-bottom: 20px;
+}
+
+/* Rating Section */
+.rating-section {
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* Action Buttons */
+.action-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0px;
+}
+.action-button {
+  font-size: 16px;
+  padding: 12px 24px;
+  margin-right: 20px;
+  width: 200px;
+}
+.action-row .el-button:last-child {
+  margin-right: 0;
+}
+
+/* Annotation Guidelines Section */
+.annotation-guidelines-card {
+  margin-top: 20px;
+}
+.annotation-guidelines-card h2 {
+  margin-top: 2px;
+}
+.guidelines-content h3 {
+  margin-top: 20px;
+  color: #333;
+}
+.guidelines-content p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+}
+.instructions-list,
+.instructions-list ul {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+}
+.instructions-list li,
+.instructions-list ul li {
+  margin-bottom: 10px;
+}
+.instructions-list strong {
+  font-weight: bold;
+}
+.instructions-list em {
+  font-style: italic;
+  color: #555;
+}
+.instruction-table .el-table th {
+  background-color: #f5f7fa;
+  font-weight: bold;
+}
+
+/* Styles for the Table of Contents */
+.table-of-contents {
+  margin-bottom: 20px;
+}
+.table-of-contents h3 {
+  margin-bottom: 10px;
+}
+.table-of-contents ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+.table-of-contents li {
+  margin-bottom: 5px;
+}
+.table-of-contents a {
+  color: #409eff;
+  text-decoration: none;
+}
+.table-of-contents a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .action-row {
+    flex-wrap: wrap;
+  }
+  .action-button {
+    margin-bottom: 10px;
+    width: 100%;
+    margin-right: 0;
+  }
+  .action-row .el-button:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.score-group {
+  margin-left: 15px;
+}
+
+.score-group .el-radio-button__inner {
+  padding: 8px 20px;
+  font-size: 16px;
+}
+</style>
+
+----- End of frontend/src/views/AnnotationView.vue -----
+
+----- Start of frontend/src/views/HomeView.vue -----
+<template>
+  <div class="home-view">
+    <h1>Welcome to Home Page</h1>
+    <p>This is the main page of the application.</p>
+  </div>
+</template>
+
+<style scoped>
+.home-view {
+  text-align: center;
+}
+</style>
+
+----- End of frontend/src/views/HomeView.vue -----
+
+----- Start of frontend/tsconfig.json -----
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "types": [
+      "webpack-env"
+    ],
+    "outDir": "./dist",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+
+----- End of frontend/tsconfig.json -----
+
+----- Start of frontend/vue.config.js -----
+const { CONFIG } = require("./src/constants/config.ts");
+
+module.exports = {
+  transpileDependencies: true,
+  devServer: {
+    port: CONFIG.FRONTEND.PORT,
+  },
+};
+
+----- End of frontend/vue.config.js -----
+
