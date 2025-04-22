@@ -122,7 +122,7 @@ npm install
 npm run serve
 ```
 
-默认会在 http://your_ip:8080 启动开发服务器（可在 vue.config.js 中更改端口）。
+默认会在 http://your_ip:8080 启动开发服务器（需要在 ./src/constants/config.ts 修改ip为服务器所在ip，端口为前端运行端口）。
 
 #### 访问标注页面
 打开浏览器访问 http://your_ip:8080，即可看到示例标注界面。前端会调用后端提供的 API 来获取/提交标注数据。
